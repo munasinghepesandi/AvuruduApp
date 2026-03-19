@@ -1,6 +1,5 @@
-import { Audio } from "expo-av";
 import * as Notifications from "expo-notifications";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Animated,
@@ -22,65 +21,10 @@ import { AbhayaLibre_700Bold, useFonts } from "@expo-google-fonts/abhaya-libre";
 export default function NakathScreen() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedNakath, setSelectedNakath] = useState<Nakath | null>(null); // තෝරාගත් නැකත තබා ගැනීමට
-  const [modalVisible, setModalVisible] = useState(false);
+  const [nakathModalVisible, setNakathModalVisible] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const splashOpacity = useState(new Animated.Value(1))[0];
-  const soundRef = useRef<Audio.Sound | null>(null);
   let [fontsLoaded] = useFonts({ AbhayaLibre_700Bold });
-
-  const playBackgroundMusic = useCallback(async () => {
-    try {
-      if (Platform.OS !== "web") {
-        await Audio.setAudioModeAsync({
-          staysActiveInBackground: true,
-          playsInSilentModeIOS: true,
-          shouldDuckAndroid: true,
-        });
-      }
-
-      if (!soundRef.current) {
-        const { sound } = await Audio.Sound.createAsync(
-          require("../../assets/audio/kajuware.mp3"),
-          { isLooping: true, volume: 0.3 },
-        );
-        soundRef.current = sound;
-      }
-
-      await soundRef.current.playAsync();
-    } catch (error) {
-      console.warn("Audio playback error:", error);
-    }
-  }, []);
-
-  // Auto play background music
-  useEffect(() => {
-    playBackgroundMusic();
-
-    if (Platform.OS === "web" && typeof window !== "undefined") {
-      const resumeOnFirstInteraction = () => {
-        playBackgroundMusic();
-      };
-
-      window.addEventListener("pointerdown", resumeOnFirstInteraction, {
-        once: true,
-      });
-
-      return () => {
-        window.removeEventListener("pointerdown", resumeOnFirstInteraction);
-        if (soundRef.current) {
-          soundRef.current.unloadAsync();
-          soundRef.current = null;
-        }
-      };
-    }
-
-    return () => {
-      if (soundRef.current) {
-        soundRef.current.unloadAsync();
-        soundRef.current = null;
-      }
-    };
-  }, [playBackgroundMusic]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -107,7 +51,7 @@ export default function NakathScreen() {
 
   const handleNakathPress = (item: Nakath) => {
     setSelectedNakath(item);
-    setModalVisible(true);
+    setNakathModalVisible(true);
   };
 
   const formattedTime = currentTime.toLocaleTimeString("si-LK", {
@@ -152,9 +96,7 @@ export default function NakathScreen() {
           >
             <View style={styles.splashOverlay} />
             <View style={styles.splashContent}>
-              <Text style={[styles.splashTitle, styles.font]}>
-                ආයුබෝවන් 
-              </Text>
+              <Text style={[styles.splashTitle, styles.font]}>ආයුබෝවන්</Text>
               <Text style={[styles.splashSubtitle, styles.font]}>
                 සුබ අලුත් අවුරුද්දක් වේවා!
               </Text>
@@ -225,10 +167,10 @@ export default function NakathScreen() {
         </ScrollView>
 
         <Modal
-          visible={modalVisible}
+          visible={nakathModalVisible}
           transparent
           animationType="fade"
-          onRequestClose={() => setModalVisible(false)}
+          onRequestClose={() => setNakathModalVisible(false)}
         >
           <View style={styles.modalBackdrop}>
             <View style={styles.modalCard}>
@@ -261,7 +203,7 @@ export default function NakathScreen() {
 
                 <TouchableOpacity
                   style={[styles.modalButton, styles.closeButton]}
-                  onPress={() => setModalVisible(false)}
+                  onPress={() => setNakathModalVisible(false)}
                 >
                   <Text style={styles.modalButtonText}>වසන්න</Text>
                 </TouchableOpacity>

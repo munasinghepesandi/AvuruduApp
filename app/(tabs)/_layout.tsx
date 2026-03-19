@@ -1,10 +1,23 @@
 import { Ionicons } from "@expo/vector-icons";
 import { SplashScreen, Tabs } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function TabLayout() {
+  const [isAppLoaded, setIsAppLoaded] = useState(false);
+
+  useEffect(() => {
+    const prepareApp = async () => {
+      // Keep splash visible briefly until the tabs are ready.
+      await new Promise((resolve) => setTimeout(resolve, 1300));
+      setIsAppLoaded(true);
+      await SplashScreen.hideAsync();
+    };
+
+    prepareApp();
+  }, []);
+
   return (
     <Tabs
       screenOptions={{
@@ -26,6 +39,7 @@ export default function TabLayout() {
           shadowOpacity: 0.2,
           shadowRadius: 12,
           shadowOffset: { width: 0, height: 6 },
+          display: isAppLoaded ? "flex" : "none",
         },
         tabBarLabelStyle: {
           fontSize: 11,

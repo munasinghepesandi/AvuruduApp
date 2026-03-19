@@ -2,9 +2,11 @@ import * as ImagePicker from "expo-image-picker";
 import * as Sharing from "expo-sharing";
 import React, { useRef, useState } from "react";
 import {
+  Alert,
   ImageBackground,
   Modal,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TextInput,
@@ -32,8 +34,27 @@ export default function GreetingsScreen() {
   };
 
   const handleShare = async () => {
-    const uri = await viewShotRef.current.capture();
-    await Sharing.shareAsync(uri);
+    try {
+      const uri = await viewShotRef.current.capture();
+
+      const canUseExpoShare = await Sharing.isAvailableAsync();
+      if (canUseExpoShare) {
+        await Sharing.shareAsync(uri, {
+          mimeType: "image/jpeg",
+          UTI: "public.jpeg",
+          dialogTitle: "මිතුරන්ට යවන්න",
+        });
+        return;
+      }
+
+      await Share.share({
+        message: "සුබ අලුත් අවුරුද්දක් වේවා!",
+        url: uri,
+        title: "මිතුරන්ට යවන්න",
+      });
+    } catch {
+      Alert.alert("Share Error", "Share options open කරන්න බැරි වුණා.");
+    }
   };
 
   return (
@@ -54,13 +75,13 @@ export default function GreetingsScreen() {
 
         <View style={styles.buttonRow}>
           <TouchableOpacity style={styles.actionBtn} onPress={pickImage}>
-            <Text style={styles.btnText}>Photo 🖼️</Text>
+            <Text style={styles.btnText}>Photo </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.actionBtn, { backgroundColor: "#B85D1A" }]}
+            style={[styles.actionBtn, { backgroundColor: "#ad3e07" }]}
             onPress={() => setShowColorPicker(true)}
           >
-            <Text style={styles.btnText}>Color 🎨</Text>
+            <Text style={styles.btnText}>Color </Text>
           </TouchableOpacity>
         </View>
 
@@ -80,6 +101,8 @@ export default function GreetingsScreen() {
               <Text style={[styles.wishText2, { color: wishColor }]}>
                 සුබ අලුත් අවුරුද්දක් වේවා!
               </Text>
+              <br />
+              <br />
               {name ? (
                 <Text style={styles.senderText}>මීට - {name}</Text>
               ) : null}
@@ -88,9 +111,7 @@ export default function GreetingsScreen() {
         </ViewShot>
 
         <TouchableOpacity style={styles.shareBtn} onPress={handleShare}>
-          <Text style={[styles.btnText, { fontSize: 18 }]}>
-            මිතුරන්ට යවන්න 📤
-          </Text>
+          <Text style={[styles.btnText, { fontSize: 18 }]}>මිතුරන්ට යවන්න</Text>
         </TouchableOpacity>
 
         {/* Color Picker Modal */}
@@ -145,7 +166,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   actionBtn: {
-    backgroundColor: "#7A2816",
+    backgroundColor: "#920606",
     padding: 14,
     borderRadius: 14,
     width: "48%",
@@ -162,14 +183,14 @@ const styles = StyleSheet.create({
   },
   cardOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.25)",
+    backgroundColor: "rgba(0,0,0,0.45)",
     justifyContent: "center",
     alignItems: "center",
   },
   wishText1: {
     fontSize: 15,
     textAlign: "center",
-    textShadowColor: "#000",
+    textShadowColor: "#b00000",
     textShadowRadius: 8,
   },
   wishText2: {
@@ -178,9 +199,9 @@ const styles = StyleSheet.create({
     textShadowColor: "#000",
     textShadowRadius: 8,
   },
-  senderText: { fontSize: 22, color: "#fff", marginTop: 15 },
+  senderText: { fontSize: 15, color: "#fff", marginTop: 15 },
   shareBtn: {
-    backgroundColor: "#B22222",
+    backgroundColor: "#680e06",
     padding: 16,
     borderRadius: 16,
     marginTop: 24,
