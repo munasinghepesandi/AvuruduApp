@@ -15,8 +15,81 @@ import {
 } from "react-native";
 import NakathItem from "../../src/components/nakathItems";
 import { Nakath, NAKATH_DATA } from "../../src/data/nakath";
+import { responsive } from "../../src/utils/responsive";
 // අප පෙර install කළ Font එක භාවිතා කරමු
 import { AbhayaLibre_700Bold, useFonts } from "@expo-google-fonts/abhaya-libre";
+
+const IS_WEB = Platform.OS === "web";
+
+type NakathStatus = "completed" | "upcoming";
+type NakathWithStatus = Nakath & { status: NakathStatus };
+
+const resolveMonthIndex = (monthLabel: string) => {
+  if (monthLabel.includes("මාර්තු")) return 2;
+  if (monthLabel.includes("අප්")) return 3;
+  return null;
+};
+
+const to24Hour = (period: string, hour: number) => {
+  if (period === "ප.ව." && hour < 12) return hour + 12;
+  if (period === "පෙ.ව." && hour === 12) return 0;
+  return hour;
+};
+
+const getNakathRange = (timeLabel: string, year: number) => {
+  const clean = timeLabel.trim();
+
+  const dayRangeMatch = clean.match(
+    /^(මාර්තු|අප්‍රේල්)\s*(\d{1,2})-(\d{1,2})$/,
+  );
+  if (dayRangeMatch) {
+    const monthIndex = resolveMonthIndex(dayRangeMatch[1]);
+    if (monthIndex === null) return null;
+
+    const startDay = Number(dayRangeMatch[2]);
+    const endDay = Number(dayRangeMatch[3]);
+    return {
+      start: new Date(year, monthIndex, startDay, 0, 0, 0, 0),
+      end: new Date(year, monthIndex, endDay, 23, 59, 59, 999),
+    };
+  }
+
+  const exactTimeMatch = clean.match(
+    /^(මාර්තු|අප්‍රේල්)\s*(\d{1,2})\s*-\s*(පෙ\.ව\.|ප\.ව\.)\s*(\d{1,2}):(\d{2})$/,
+  );
+  if (exactTimeMatch) {
+    const monthIndex = resolveMonthIndex(exactTimeMatch[1]);
+    if (monthIndex === null) return null;
+
+    const day = Number(exactTimeMatch[2]);
+    const period = exactTimeMatch[3];
+    const hour = to24Hour(period, Number(exactTimeMatch[4]));
+    const minute = Number(exactTimeMatch[5]);
+    const exact = new Date(year, monthIndex, day, hour, minute, 0, 0);
+
+    return { start: exact, end: exact };
+  }
+
+  const dayOnlyMatch = clean.match(/^(මාර්තු|අප්‍රේල්)\s*(\d{1,2})$/);
+  if (dayOnlyMatch) {
+    const monthIndex = resolveMonthIndex(dayOnlyMatch[1]);
+    if (monthIndex === null) return null;
+
+    const day = Number(dayOnlyMatch[2]);
+    return {
+      start: new Date(year, monthIndex, day, 0, 0, 0, 0),
+      end: new Date(year, monthIndex, day, 23, 59, 59, 999),
+    };
+  }
+
+  return null;
+};
+
+const getNakathStatus = (item: Nakath, now: Date): NakathStatus => {
+  const range = getNakathRange(item.time, now.getFullYear());
+  if (!range) return "upcoming";
+  return now.getTime() > range.end.getTime() ? "completed" : "upcoming";
+};
 
 export default function NakathScreen() {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -25,6 +98,9 @@ export default function NakathScreen() {
   const [showSplash, setShowSplash] = useState(true);
   const splashOpacity = useState(new Animated.Value(1))[0];
   let [fontsLoaded] = useFonts({ AbhayaLibre_700Bold });
+
+  // On web, always show the app even if fonts are loading
+  const shouldRender = IS_WEB || fontsLoaded;
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -61,6 +137,20 @@ export default function NakathScreen() {
     hour12: true,
   });
 
+  const nakathWithStatus: NakathWithStatus[] = NAKATH_DATA.map((item) => ({
+    ...item,
+    status: getNakathStatus(item, currentTime),
+  }));
+  const completedNakath = nakathWithStatus.filter(
+    (item) => item.status === "completed",
+  );
+  const upcomingNakath = nakathWithStatus.filter(
+    (item) => item.status === "upcoming",
+  );
+  const selectedNakathStatus = selectedNakath
+    ? getNakathStatus(selectedNakath, currentTime)
+    : null;
+
   const setReminder = async (event: string) => {
     if (Platform.OS !== "web") {
       await Notifications.scheduleNotificationAsync({
@@ -80,7 +170,13 @@ export default function NakathScreen() {
     );
   };
 
-  if (!fontsLoaded) return null;
+  if (!shouldRender) {
+    return (
+      <View>
+        <Text>Loading...</Text>
+      </View>
+    ); // මෙහෙම දෙයක් දාන්න
+  }
 
   return (
     <>
@@ -152,16 +248,57 @@ export default function NakathScreen() {
             <Text style={styles.sectionMeta}>{NAKATH_DATA.length} Events</Text>
           </View>
 
-          {NAKATH_DATA.map((item) => (
+          <View style={styles.statusSectionHeader}>
+            <Text style={[styles.statusSectionTitle, styles.font]}>
+              අවසන් චාරිත්‍ර
+            </Text>
+            <Text style={styles.statusSectionCount}>
+              {completedNakath.length}
+            </Text>
+          </View>
+          {completedNakath.length === 0 ? (
+            <Text style={styles.emptyState}>තවම අවසන් වූ චාරිත්‍ර නොමැත.</Text>
+          ) : (
+            completedNakath.map((item) => (
+              <Pressable
+                key={`completed-${item.id}`}
+                onPress={() => handleNakathPress(item)}
+                style={({ pressed }) => [
+                  styles.itemPressable,
+                  pressed && styles.itemPressed,
+                ]}
+              >
+                <NakathItem
+                  event={item.event}
+                  time={item.time}
+                  isUpcoming={item.status === "upcoming"}
+                />
+              </Pressable>
+            ))
+          )}
+
+          <View style={styles.statusSectionHeader}>
+            <Text style={[styles.statusSectionTitle, styles.font]}>
+              ඉදිරියට ඇති චාරිත්‍ර
+            </Text>
+            <Text style={styles.statusSectionCount}>
+              {upcomingNakath.length}
+            </Text>
+          </View>
+          {upcomingNakath.map((item) => (
             <Pressable
-              key={item.id}
+              key={`upcoming-${item.id}`}
               onPress={() => handleNakathPress(item)}
               style={({ pressed }) => [
                 styles.itemPressable,
                 pressed && styles.itemPressed,
               ]}
             >
-              <NakathItem {...item} />
+              <NakathItem
+                event={item.event}
+                time={item.time}
+                isUpcoming={item.status === "upcoming"}
+              />
             </Pressable>
           ))}
         </ScrollView>
@@ -181,8 +318,20 @@ export default function NakathScreen() {
               <Text style={styles.modalMeta}>
                 🕒 වේලාව: {selectedNakath?.time}
               </Text>
+              <Text
+                style={[
+                  styles.modalMeta,
+                  selectedNakathStatus === "completed"
+                    ? styles.completedMeta
+                    : styles.upcomingMeta,
+                ]}
+              >
+                {selectedNakathStatus === "completed"
+                  ? "✅ තත්ත්වය: අවසන්"
+                  : "⏳ තත්ත්වය: ඉදිරියට"}
+              </Text>
               <Text style={styles.modalMeta}>
-                🎨 වර්ණය: {selectedNakath?.color || "අදාළ නොවේ"}
+                🎨 වර්ණය: {selectedNakath?.color?.trim() || "නැත"}
               </Text>
 
               <Text style={styles.modalDescription}>
@@ -225,10 +374,10 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(31, 13, 6, 0.48)",
   },
   content: {
-    paddingHorizontal: 18,
-    paddingTop: 28,
-    paddingBottom: 36,
-    gap: 14,
+    paddingHorizontal: responsive.spacing.lg,
+    paddingTop: responsive.spacing["3xl"],
+    paddingBottom: 120,
+    gap: responsive.spacing.md,
   },
   font: {
     fontFamily: "AbhayaLibre_700Bold",
@@ -252,10 +401,10 @@ const styles = StyleSheet.create({
   },
   splashContent: {
     alignItems: "center",
-    gap: 20,
+    gap: responsive.spacing.xl,
   },
   splashTitle: {
-    fontSize: 56,
+    fontSize: responsive.fontSize["5xl"],
     color: "#FFF0DB",
     fontWeight: "800",
     letterSpacing: 2,
@@ -264,7 +413,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 8,
   },
   splashSubtitle: {
-    fontSize: 28,
+    fontSize: responsive.fontSize["2xl"],
     color: "#FFD5A3",
     fontWeight: "700",
     textAlign: "center",
@@ -272,8 +421,8 @@ const styles = StyleSheet.create({
   },
   splashLoader: {
     flexDirection: "row",
-    gap: 8,
-    marginTop: 20,
+    gap: responsive.spacing.sm,
+    marginTop: responsive.spacing.lg,
   },
   loaderDot: {
     width: 12,
@@ -282,33 +431,34 @@ const styles = StyleSheet.create({
     backgroundColor: "#B22222",
   },
   heroCard: {
-    borderRadius: 26,
-    padding: 18,
+    marginTop: responsive.spacing["3xl"],
+    borderRadius: responsive.borderRadius.xl,
+    padding: responsive.spacing.lg,
     backgroundColor: "rgba(243, 234, 212, 0.88)",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.7)",
     shadowColor: "#e57b11",
     shadowOpacity: 0.28,
-    shadowRadius: 20,
+    shadowRadius: 16,
     shadowOffset: { width: 0, height: 10 },
     elevation: 8,
-    gap: 10,
+    gap: responsive.spacing.sm,
   },
   heroBadge: {
     alignSelf: "flex-start",
     backgroundColor: "#B22222",
     color: "#fff",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: responsive.spacing.md,
+    paddingVertical: responsive.spacing.xs,
     borderRadius: 999,
-    fontSize: 12,
+    fontSize: responsive.fontSize.xs,
     letterSpacing: 1,
   },
   heroTitle: {
-    fontSize: 30,
+    fontSize: responsive.fontSize["3xl"],
     textAlign: "center",
     color: "#6A1B0A",
-    lineHeight: 38,
+    lineHeight: responsive.fontSize["4xl"],
   },
   heroSubtitle: {
     fontSize: 15,
@@ -321,51 +471,76 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   clockCard: {
-    borderRadius: 24,
+    borderRadius: responsive.borderRadius.full,
     width: "100%",
     alignSelf: "center",
-    paddingVertical: 14,
-    paddingHorizontal: 14,
+    paddingVertical: responsive.spacing.md,
+    paddingHorizontal: responsive.spacing.md,
     borderColor: "rgba(255, 255, 255, 0.25)",
     alignItems: "center",
   },
   dateText: {
-    fontSize: 18,
+    fontSize: responsive.fontSize.lg,
     color: "#6f0303",
-    marginBottom: 4,
+    marginBottom: responsive.spacing.xs,
   },
   liveTime: {
-    fontSize: 34,
+    fontSize: responsive.fontSize["4xl"],
     fontWeight: "800",
     color: "#7a0707",
     letterSpacing: 1,
   },
   clockCaption: {
-    marginTop: 2,
-    fontSize: 11,
+    marginTop: responsive.spacing.xs,
+    fontSize: responsive.fontSize.xs,
     color: "#e22222",
     letterSpacing: 0.3,
   },
 
   sectionHeaderRow: {
-    marginTop: 4,
-    marginBottom: 2,
+    marginTop: responsive.spacing.xs,
+    marginBottom: responsive.spacing.xs,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
   sectionTitle: {
-    fontSize: 27,
+    fontSize: responsive.fontSize["2xl"],
     color: "#f5e5e5",
   },
   sectionMeta: {
-    fontSize: 13,
+    fontSize: responsive.fontSize.sm,
     color: "#FFD5A3",
     fontWeight: "600",
   },
+  statusSectionHeader: {
+    marginTop: responsive.spacing.sm,
+    marginBottom: responsive.spacing.xs,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  statusSectionTitle: {
+    fontSize: responsive.fontSize.base,
+    color: "#FFF2DE",
+  },
+  statusSectionCount: {
+    fontSize: responsive.fontSize.xs,
+    color: "#FFE2B8",
+    backgroundColor: "rgba(106, 27, 10, 0.5)",
+    paddingHorizontal: responsive.spacing.sm,
+    paddingVertical: responsive.spacing.xs,
+    borderRadius: 999,
+    fontWeight: "700",
+  },
+  emptyState: {
+    color: "#FFEDCF",
+    fontSize: responsive.fontSize.sm,
+    marginBottom: responsive.spacing.sm,
+  },
   itemPressable: {
-    borderRadius: 20,
-    marginBottom: 10,
+    borderRadius: responsive.borderRadius.xl,
+    marginBottom: responsive.spacing.sm,
   },
   itemPressed: {
     transform: [{ scale: 0.985 }],
@@ -375,43 +550,49 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.55)",
     justifyContent: "center",
-    padding: 20,
+    padding: responsive.spacing.xl,
   },
   modalCard: {
     backgroundColor: "#FFF5EA",
-    borderRadius: 18,
-    padding: 18,
+    borderRadius: responsive.borderRadius.lg,
+    padding: responsive.spacing.lg,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.9)",
   },
   modalTitle: {
-    fontSize: 28,
+    fontSize: responsive.fontSize["2xl"],
     color: "#6A1B0A",
-    marginBottom: 12,
+    marginBottom: responsive.spacing.md,
     textAlign: "center",
   },
   modalMeta: {
-    fontSize: 15,
+    fontSize: responsive.fontSize.base,
     color: "#5B2A16",
-    marginBottom: 4,
+    marginBottom: responsive.spacing.xs,
     fontWeight: "600",
   },
+  completedMeta: {
+    color: "#B22222",
+  },
+  upcomingMeta: {
+    color: "#1D6B2A",
+  },
   modalDescription: {
-    marginTop: 10,
-    fontSize: 16,
-    lineHeight: 24,
+    marginTop: responsive.spacing.sm,
+    fontSize: responsive.fontSize.base,
+    lineHeight: responsive.fontSize.xl,
     color: "#452013",
   },
   modalButtonsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 10,
-    marginTop: 16,
+    gap: responsive.spacing.sm,
+    marginTop: responsive.spacing.lg,
   },
   modalButton: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingVertical: responsive.spacing.md,
+    borderRadius: responsive.borderRadius.md,
     alignItems: "center",
   },
   reminderButton: {

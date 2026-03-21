@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 interface NakathProps {
   event: string;
   time: string;
-  color: string;
+  isUpcoming: boolean;
 }
 
 function getColorSwatch(colorLabel: string) {
@@ -17,7 +17,7 @@ function getColorSwatch(colorLabel: string) {
   if (label.includes("කොළ") || label.includes("green")) {
     return "#2E7D32";
   }
-  
+
   if (label.includes("සුදු") || label.includes("white")) {
     return "#ffffff";
   }
@@ -29,21 +29,20 @@ function getColorSwatch(colorLabel: string) {
   return "#000000db";
 }
 
-export default function NakathItem({ event, time, color }: NakathProps) {
-  const swatchColor = getColorSwatch(color);
-
+export default function NakathItem({ event, time, isUpcoming }: NakathProps) {
   return (
     <View style={styles.item}>
       <View style={styles.rowTop}>
         <Text style={styles.tag}>NAKATH</Text>
-        <View style={[styles.colorDot, { backgroundColor: swatchColor }]} />
+        <Text style={isUpcoming ? styles.upcoming : styles.past}>
+          {isUpcoming ? "ඉදිරියේදී" : "පසුගිය"}
+        </Text>
       </View>
 
       <Text style={styles.eventText}>{event}</Text>
 
       <View style={styles.metaWrap}>
         <Text style={styles.timeText}>⏰ {time}</Text>
-        <Text style={styles.colorText}>🎨 වර්ණය: {color}</Text>
       </View>
     </View>
   );
@@ -74,12 +73,25 @@ const styles = StyleSheet.create({
     color: "#B05A2F",
     fontWeight: "700",
   },
-  colorDot: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    borderWidth: 1,
-    borderColor: "#000000",
+  upcoming: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#2E7D32", // Green
+    backgroundColor: "#E8F5E9",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  past: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#B71C1C", // Red
+    backgroundColor: "#FFEBEE",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    overflow: "hidden",
   },
   eventText: {
     fontSize: 22,

@@ -1,14 +1,21 @@
 import React from "react";
 import {
-    ImageBackground,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
 } from "react-native";
-import { GAMES_DATA } from "../../src/data/games"; // Path එක නිවැරදිදැයි බලන්න
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { GAMES_DATA } from "../../src/data/games";
+import { responsive } from "../../src/utils/responsive";
 
 export default function ExploreScreen() {
+  const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const isSmallScreen = width < 380;
+
   return (
     <ImageBackground
       source={{
@@ -17,12 +24,31 @@ export default function ExploreScreen() {
       style={styles.container}
     >
       <View style={styles.overlay} />
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>අවුරුදු ක්‍රීඩා</Text>
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingTop:
+              insets.top + responsive.spacing["3xl"] + responsive.spacing.md,
+            paddingBottom: insets.bottom + 112,
+            paddingHorizontal: isSmallScreen ? 14 : 20,
+          },
+        ]}
+      >
+        <Text style={[styles.title, { fontSize: isSmallScreen ? 25 : 30 }]}>
+          අවුරුදු ක්‍රීඩා
+        </Text>
 
         {GAMES_DATA.map((game) => (
-          <View key={game.id} style={styles.gameCard}>
-            <Text style={styles.gameName}>🏆 {game.name}</Text>
+          <View
+            key={game.id}
+            style={[styles.gameCard, { padding: isSmallScreen ? 14 : 16 }]}
+          >
+            <Text
+              style={[styles.gameName, { fontSize: isSmallScreen ? 19 : 22 }]}
+            >
+              🏆 {game.name}
+            </Text>
             <Text style={styles.gameDescription}>{game.description}</Text>
           </View>
         ))}
@@ -38,8 +64,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(31, 13, 6, 0.38)",
   },
   content: {
-    padding: 20,
-    paddingBottom: 110,
+    gap: 8,
   },
   title: {
     fontSize: 30,

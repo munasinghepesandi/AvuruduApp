@@ -5,6 +5,7 @@ import {
   Alert,
   ImageBackground,
   Modal,
+  Platform,
   ScrollView,
   Share,
   StyleSheet,
@@ -13,10 +14,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ViewShot from "react-native-view-shot";
 import ColorPicker from "react-native-wheel-color-picker";
+import { responsive, responsiveFontSize } from "../../src/utils/responsive";
 
 export default function GreetingsScreen() {
+  const insets = useSafeAreaInsets();
   const [name, setName] = useState<string>("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [wishColor, setWishColor] = useState<string>("#FFD700");
@@ -37,6 +41,56 @@ export default function GreetingsScreen() {
     try {
       const uri = await viewShotRef.current.capture();
 
+      if (Platform.OS === "web") {
+        if (typeof document === "undefined") {
+          Alert.alert(
+            "Browser Not Supported",
+            "ඔයාගේ browser එක මේ feature එකට support කරන්නේ නැහැ.",
+          );
+          return;
+        }
+
+        const nav = navigator as Navigator & {
+          canShare?: (data?: ShareData) => boolean;
+        };
+
+        if (typeof nav.share === "function") {
+          try {
+            const response = await fetch(uri);
+            const blob = await response.blob();
+            const file = new File([blob], `suba-pathum-${Date.now()}.jpg`, {
+              type: blob.type || "image/jpeg",
+            });
+
+            if (nav.canShare?.({ files: [file] })) {
+              await nav.share({
+                title: "සුබ අලුත් අවුරුද්දක් වේවා!",
+                text: "මගේ අවුරුදු සුබපැතුම",
+                files: [file],
+              });
+            } else {
+              await nav.share({
+                title: "සුබ අලුත් අවුරුද්දක් වේවා!",
+                text: "මගේ අවුරුදු සුබපැතුම",
+              });
+            }
+
+            return;
+          } catch {
+            // If Web Share API fails (or user cancels), fall back to download.
+          }
+        }
+
+        const link = document.createElement("a");
+        link.href = uri;
+        link.download = `suba-pathum-${Date.now()}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        Alert.alert("Download Ready", "පිංතූරය download වුණා.");
+        return;
+      }
+
       const canUseExpoShare = await Sharing.isAvailableAsync();
       if (canUseExpoShare) {
         await Sharing.shareAsync(uri, {
@@ -53,16 +107,33 @@ export default function GreetingsScreen() {
         title: "මිතුරන්ට යවන්න",
       });
     } catch {
+      if (Platform.OS === "web") {
+        Alert.alert(
+          "Browser Not Supported",
+          "ඔයාගේ browser එක මේ feature එකට support කරන්නේ නැහැ.",
+        );
+        return;
+      }
+
       Alert.alert("Share Error", "Share options open කරන්න බැරි වුණා.");
     }
   };
 
   return (
-    <ImageBackground style={styles.screen}>
+    <ImageBackground
+      source={{
+        uri: "https://img.freepik.com/premium-vector/sinhala-avurudu-designs-vector-illustration_1036273-89.jpg",
+      }}
+      style={styles.screen}
+    >
       <View style={styles.overlay} />
       <ScrollView
         style={styles.container}
-        contentContainerStyle={{ paddingBottom: 50 }}
+        contentContainerStyle={{
+          paddingTop:
+            insets.top + responsive.spacing["3xl"] + responsive.spacing.md,
+          paddingBottom: 50,
+        }}
       >
         <Text style={styles.title}>ඩිජිටල් සුබපැතුම් පතක් හදමු</Text>
 
@@ -101,8 +172,7 @@ export default function GreetingsScreen() {
               <Text style={[styles.wishText2, { color: wishColor }]}>
                 සුබ අලුත් අවුරුද්දක් වේවා!
               </Text>
-              <br />
-              <br />
+              <View style={{ height: 20 }} />
               {name ? (
                 <Text style={styles.senderText}>මීට - {name}</Text>
               ) : null}
@@ -111,7 +181,9 @@ export default function GreetingsScreen() {
         </ViewShot>
 
         <TouchableOpacity style={styles.shareBtn} onPress={handleShare}>
-          <Text style={[styles.btnText, { fontSize: 18 }]}>මිතුරන්ට යවන්න</Text>
+          <Text style={[styles.btnText, { fontSize: responsiveFontSize(18) }]}>
+            මිතුරන්ට යවන්න
+          </Text>
         </TouchableOpacity>
 
         {/* Color Picker Modal */}
@@ -143,22 +215,23 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(31, 13, 6, 0.38)",
   },
-  container: { flex: 1, padding: 20 },
+  container: { flex: 1, paddingHorizontal: 20 },
   title: {
-    fontSize: 30,
+    fontSize: responsiveFontSize(30),
     textAlign: "center",
-    marginTop: 10,
-    marginBottom: 18,
+    marginTop: responsive.spacing.sm,
+    marginBottom: responsive.spacing.lg,
     color: "#FFF0DB",
     fontWeight: "700",
   },
   input: {
     backgroundColor: "rgba(255, 248, 236, 0.93)",
-    padding: 15,
-    borderRadius: 16,
-    marginBottom: 15,
+    padding: responsive.spacing.md,
+    borderRadius: responsive.borderRadius.md,
+    marginBottom: responsive.spacing.md,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.8)",
+    fontSize: responsiveFontSize(15),
   },
   buttonRow: {
     flexDirection: "row",
@@ -167,8 +240,8 @@ const styles = StyleSheet.create({
   },
   actionBtn: {
     backgroundColor: "#920606",
-    padding: 14,
-    borderRadius: 14,
+    padding: responsive.spacing.md,
+    borderRadius: responsive.borderRadius.md,
     width: "48%",
     alignItems: "center",
   },
@@ -188,26 +261,35 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   wishText1: {
-    fontSize: 15,
+    fontSize: responsiveFontSize(15),
     textAlign: "center",
     textShadowColor: "#b00000",
     textShadowRadius: 8,
   },
   wishText2: {
-    fontSize: 34,
+    fontSize: responsiveFontSize(34),
     textAlign: "center",
     textShadowColor: "#000",
     textShadowRadius: 8,
   },
-  senderText: { fontSize: 15, color: "#fff", marginTop: 15 },
+  senderText: {
+    fontSize: responsiveFontSize(15),
+    color: "#fff",
+    marginTop: responsive.spacing.md,
+  },
   shareBtn: {
     backgroundColor: "#680e06",
-    padding: 16,
-    borderRadius: 16,
-    marginTop: 24,
+    padding: responsive.spacing.md,
+    borderRadius: responsive.borderRadius.md,
+    marginTop: responsive.spacing.xl,
     alignItems: "center",
   },
-  btnText: { color: "#fff", fontWeight: "700", letterSpacing: 0.3 },
+  btnText: {
+    color: "#fff",
+    fontWeight: "700",
+    letterSpacing: 0.3,
+    fontSize: responsiveFontSize(15),
+  },
   closeBtn: {
     backgroundColor: "#b22222",
     padding: 15,

@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import {
-  Image,
-  ImageBackground,
-  Linking,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    Image,
+    ImageBackground,
+    Linking,
+    Modal,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { responsive } from "../../src/utils/responsive";
 
 type SongItem = {
   id: string;
@@ -136,6 +138,7 @@ const YOUTUBE_VIDEOS = [
 export default function SongsScreen() {
   const [selectedSong, setSelectedSong] = useState<SongItem | null>(null);
   const [imageModalVisible, setImageModalVisible] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const openImagePreview = (song: SongItem) => {
     setSelectedSong(song);
@@ -157,7 +160,15 @@ export default function SongsScreen() {
       style={styles.container}
     >
       <View style={styles.overlay} />
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingTop:
+              insets.top + responsive.spacing["3xl"] + responsive.spacing.md,
+          },
+        ]}
+      >
         <Text style={styles.title}>අවුරුදු ගී එකතුව</Text>
 
         <View style={styles.videoSection}>
@@ -182,10 +193,8 @@ export default function SongsScreen() {
                 <Text style={styles.videoAction}>Open on YouTube</Text>
               </View>
             </Pressable>
-            
           ))}
         </View>
-        <br/>
 
         <View style={styles.listCard}>
           <Text style={styles.subtitle}>ගීත ලැයිස්තුව (lyrics)</Text>
@@ -238,18 +247,22 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(31, 13, 6, 0.38)",
   },
-  content: { padding: 20, paddingBottom: 110 },
+  content: {
+    paddingHorizontal: responsive.spacing.lg,
+    paddingBottom: 110,
+  },
   title: {
-    fontSize: 30,
-    marginBottom: 16,
+    fontSize: responsive.fontSize["3xl"],
+    marginBottom: responsive.spacing.lg,
     color: "#FFF0DB",
     textAlign: "center",
     fontWeight: "700",
   },
   listCard: {
     backgroundColor: "rgba(255, 248, 236, 0.95)",
-    padding: 16,
-    borderRadius: 18,
+    padding: responsive.spacing.md,
+    marginTop: responsive.spacing.xl,
+    borderRadius: responsive.borderRadius.lg,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.8)",
     elevation: 6,
@@ -259,10 +272,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 8 },
   },
   subtitle: {
-    fontSize: 15,
+    fontSize: responsive.fontSize.sm,
     color: "#6A1B0A",
     textAlign: "center",
-    marginBottom: 14,
+    marginBottom: responsive.spacing.md,
     fontWeight: "600",
   },
   songRow: {
@@ -271,8 +284,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     borderBottomWidth: 1,
     borderBottomColor: "rgba(74, 35, 14, 0.15)",
-    paddingVertical: 12,
-    gap: 12,
+    paddingVertical: responsive.spacing.md,
+    gap: responsive.spacing.sm,
   },
   lastSongRow: {
     borderBottomWidth: 0,
@@ -284,35 +297,35 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   songTitle: {
-    fontSize: 16,
+    fontSize: responsive.fontSize.base,
     color: "#4A230E",
     fontWeight: "700",
   },
   rowAction: {
-    fontSize: 12,
+    fontSize: responsive.fontSize.xs,
     color: "#B22222",
     fontWeight: "700",
     backgroundColor: "rgba(178, 34, 34, 0.1)",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingHorizontal: responsive.spacing.sm,
+    paddingVertical: responsive.spacing.xs,
     borderRadius: 999,
   },
   videoSection: {
-    marginTop: 14,
+    marginTop: responsive.spacing.lg,
     backgroundColor: "rgba(255, 248, 236, 0.95)",
-    padding: 16,
-    borderRadius: 18,
+    padding: responsive.spacing.md,
+    borderRadius: responsive.borderRadius.lg,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.8)",
-    gap: 12,
+    gap: responsive.spacing.md,
   },
   videoSectionTitle: {
-    fontSize: 18,
+    fontSize: responsive.fontSize.lg,
     color: "#6A1B0A",
     fontWeight: "700",
   },
   videoCard: {
-    borderRadius: 14,
+    borderRadius: responsive.borderRadius.md,
     overflow: "hidden",
     backgroundColor: "#FFF7EE",
     borderWidth: 1,
@@ -323,19 +336,19 @@ const styles = StyleSheet.create({
   },
   videoThumbnail: {
     width: "100%",
-    height: 170,
+    height: responsive.imageHeight.md,
   },
   videoTextWrap: {
-    padding: 12,
+    padding: responsive.spacing.md,
   },
   videoTitle: {
-    fontSize: 15,
+    fontSize: responsive.fontSize.base,
     color: "#4A230E",
     fontWeight: "700",
   },
   videoAction: {
-    marginTop: 4,
-    fontSize: 12,
+    marginTop: responsive.spacing.xs,
+    fontSize: responsive.fontSize.sm,
     color: "#B22222",
     fontWeight: "600",
   },
@@ -344,7 +357,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.82)",
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 10,
+    paddingHorizontal: responsive.spacing.sm,
   },
   previewImage: {
     width: "100%",

@@ -1,10 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { SplashScreen, Tabs } from "expo-router";
 import React, { useEffect, useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
   const [isAppLoaded, setIsAppLoaded] = useState(false);
 
   useEffect(() => {
@@ -28,10 +30,11 @@ export default function TabLayout() {
           position: "absolute",
           left: 14,
           right: 14,
-          bottom: 12,
+          bottom: Math.max(insets.bottom, 10) + 10,
           borderRadius: 22,
-          height: 66,
+          height: 70,
           paddingTop: 8,
+          paddingBottom: 8,
           backgroundColor: "rgba(255, 246, 233, 0.95)",
           borderTopWidth: 0,
           elevation: 10,
