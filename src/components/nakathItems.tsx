@@ -5,6 +5,8 @@ interface NakathProps {
   event: string;
   time: string;
   isUpcoming: boolean;
+  upcomingLabel: string;
+  completedLabel: string;
 }
 
 function getColorSwatch(colorLabel: string) {
@@ -29,13 +31,19 @@ function getColorSwatch(colorLabel: string) {
   return "#000000db";
 }
 
-export default function NakathItem({ event, time, isUpcoming }: NakathProps) {
+export default function NakathItem({
+  event,
+  time,
+  isUpcoming,
+  upcomingLabel,
+  completedLabel,
+}: NakathProps) {
   return (
     <View style={styles.item}>
       <View style={styles.rowTop}>
         <Text style={styles.tag}>NAKATH</Text>
         <Text style={isUpcoming ? styles.upcoming : styles.past}>
-          {isUpcoming ? "ඉදිරියේදී" : "පසුගිය"}
+          {isUpcoming ? upcomingLabel : completedLabel}
         </Text>
       </View>
 

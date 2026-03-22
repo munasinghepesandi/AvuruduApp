@@ -1,21 +1,24 @@
 import React, { useState } from "react";
 import {
-    Image,
-    ImageBackground,
-    Linking,
-    Modal,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  Image,
+  ImageBackground,
+  Linking,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import LanguageToggle from "../../src/components/language-toggle";
+import { useLanguage } from "../../src/context/language-context";
 import { responsive } from "../../src/utils/responsive";
 
 type SongItem = {
   id: string;
   title: string;
+  titleEn: string;
   image: string;
 };
 
@@ -23,92 +26,108 @@ const SONG_LIST: SongItem[] = [
   {
     id: "1",
     title: "කොහෝ කොහෝ ...",
+    titleEn: "Koho Koho...",
     image: "https://www.lklyrics.com/img/songs/sanath_nandasiri/koho_koho_.png",
   },
   {
     id: "2",
     title: "මේ අවුරුදු කාලේ ...",
+    titleEn: "Me Avurudu Kale...",
     image:
       "https://www.lklyrics.com/img/songs/lionel_ranwala/me_awurudu_kale.png",
   },
   {
     id: "3",
     title: "මී අඹ අත්තේ ...",
+    titleEn: "Mee Amba Atthe...",
     image:
       "https://www.lklyrics.com/img/songs/milton_mallawarachchi/mee_amba_aththe.png",
   },
   {
     id: "4",
     title: "නාඩන් පුංචි හිරමනේ ...",
+    titleEn: "Nadan Punchi Hiramane...",
     image:
       "https://www.lklyrics.com/img/songs/pradeepa_dharmadasa/nadan_punchi_hiramane.png",
   },
   {
     id: "5",
     title: "බැද්ද පුරා සුදු රෙද්ද ...",
+    titleEn: "Badda Pura Sudu Redda...",
     image:
       "https://www.lklyrics.com/img/songs/amitha_wadisinghe/baddha_pura_sudu_redda.png",
   },
   {
     id: "6",
     title: "එරබදු මල් පිපිලා...",
+    titleEn: "Erabadu Mal Pipila...",
     image:
       "https://www.lklyrics.com/img/songs/nelu_adhikari/erabadu_mal_pipila.png",
   },
   {
     id: "7",
     title: "ඇවිල්ල ඇවිල්ලා ...",
+    titleEn: "Avilla Avilla...",
     image:
       "https://www.lklyrics.com/img/songs/ishark_beg/awilla_awilla_sinhala_aurudda_awilla.png",
   },
   {
     id: "8",
     title: "සිරිලක පිරි අවුරුදු සිරි ...",
+    titleEn: "Sirilaka Piri Avurudu Siri...",
     image:
       "https://www.lklyrics.com/img/songs/amal_perera/sirilaka_piri_awurudu_siri.png",
   },
   {
     id: "9",
     title: "ආල පුරන්නට ...",
+    titleEn: "Aala Purannata...",
     image: "https://www.lklyrics.com/img/songs/centigradz/aala_purannata.png",
   },
   {
     id: "10",
     title: "සුබ සිහිනේ යාවී ...",
+    titleEn: "Suba Sihine Yavi...",
     image:
       "https://www.lklyrics.com/img/songs/deshan_thuvan/suba_sihine_yavi.png",
   },
   {
     id: "11",
     title: "අවුරුදු ආවා ...",
+    titleEn: "Avurudu Awa...",
     image: "https://www.lklyrics.com/img/songs/jothipala_h_r/awurudu_awa.png",
   },
   {
     id: "12",
     title: "රූ වරුණා ...",
+    titleEn: "Ru Waruna...",
     image: "https://www.lklyrics.com/img/songs/centigradz/ru_waruna.png",
   },
   {
     id: "13",
     title: "කන්ද උඩින් ...",
+    titleEn: "Kanda Udin...",
     image:
       "https://song.sgp1.digitaloceanspaces.com/image/lyrics/2020/08/1255.jpg",
   },
   {
     id: "14",
     title: "සූරිය මංගල්ලේ ...",
+    titleEn: "Sooriya Mangalle...",
     image:
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTg7fqAZNScrBg7IdLlcINOqVhyYGALxzyYYA&s",
   },
   {
     id: "15",
     title: "අවුරුදු ලගා වුණා ...",
+    titleEn: "Avurudu Langa Una...",
     image:
       "https://www.lklyrics.com/img/songs/jothipala_h_r/awurudu_langa_una.png",
   },
   {
     id: "17",
     title: "පුංචි පැලත් ...",
+    titleEn: "Punchi Palath...",
     image:
       "https://www.lklyrics.com/img/songs/chandraleka_perera/punchi_palath.png",
   },
@@ -118,18 +137,21 @@ const YOUTUBE_VIDEOS = [
   {
     id: "v1",
     title: "අවුරුදු ගීත එකතුව 1",
+    titleEn: "Avurudu Song Mix 1",
     url: "https://youtu.be/ZX5uJRoDPtM?si=u4ewSni3ju59RR4P",
     thumbnail: "https://i.ytimg.com/vi/ZX5uJRoDPtM/mqdefault.jpg",
   },
   {
     id: "v2",
     title: "අවුරුදු ගීත එකතුව 2",
+    titleEn: "Avurudu Song Mix 2",
     url: "https://youtu.be/oTllAFW9Jho?si=NxZHJMrNElg0hR4p",
     thumbnail: "https://i.ytimg.com/vi/oTllAFW9Jho/maxresdefault.jpg",
   },
   {
     id: "v3",
     title: "අවුරුදු ගීත එකතුව 3",
+    titleEn: "Avurudu Song Mix 3",
     url: "https://youtu.be/AUtr_zNUNzs?si=4yxtKf4YRCWBAkKw",
     thumbnail: "https://i.ytimg.com/vi/AUtr_zNUNzs/sddefault.jpg?v=660f6d56",
   },
@@ -139,6 +161,17 @@ export default function SongsScreen() {
   const [selectedSong, setSelectedSong] = useState<SongItem | null>(null);
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
+  const { language } = useLanguage();
+
+  const title =
+    language === "si" ? "අවුරුදු ගී එකතුව" : "Avurudu Song Collection";
+  const videoSectionTitle =
+    language === "si" ? "යූටියුබ් වීඩියෝ" : "YouTube Videos";
+  const openAction =
+    language === "si" ? "YouTube එකෙන් අරඹන්න" : "Open on YouTube";
+  const listTitle =
+    language === "si" ? "ගීත ලැයිස්තුව (lyrics)" : "Song List (Lyrics)";
+  const rowAction = language === "si" ? "බලන්න" : "View";
 
   const openImagePreview = (song: SongItem) => {
     setSelectedSong(song);
@@ -160,6 +193,7 @@ export default function SongsScreen() {
       style={styles.container}
     >
       <View style={styles.overlay} />
+      <LanguageToggle />
       <ScrollView
         contentContainerStyle={[
           styles.content,
@@ -169,10 +203,10 @@ export default function SongsScreen() {
           },
         ]}
       >
-        <Text style={styles.title}>අවුරුදු ගී එකතුව</Text>
+        <Text style={styles.title}>{title}</Text>
 
         <View style={styles.videoSection}>
-          <Text style={styles.videoSectionTitle}>YouTube Videos</Text>
+          <Text style={styles.videoSectionTitle}>{videoSectionTitle}</Text>
 
           {YOUTUBE_VIDEOS.map((video) => (
             <Pressable
@@ -189,15 +223,17 @@ export default function SongsScreen() {
                 resizeMode="cover"
               />
               <View style={styles.videoTextWrap}>
-                <Text style={styles.videoTitle}>{video.title}</Text>
-                <Text style={styles.videoAction}>Open on YouTube</Text>
+                <Text style={styles.videoTitle}>
+                  {language === "si" ? video.title : video.titleEn}
+                </Text>
+                <Text style={styles.videoAction}>{openAction}</Text>
               </View>
             </Pressable>
           ))}
         </View>
 
         <View style={styles.listCard}>
-          <Text style={styles.subtitle}>ගීත ලැයිස්තුව (lyrics)</Text>
+          <Text style={styles.subtitle}>{listTitle}</Text>
 
           {SONG_LIST.map((item, index) => (
             <Pressable
@@ -210,9 +246,11 @@ export default function SongsScreen() {
               onPress={() => openImagePreview(item)}
             >
               <View style={styles.songTextWrap}>
-                <Text style={styles.songTitle}>{item.title}</Text>
+                <Text style={styles.songTitle}>
+                  {language === "si" ? item.title : item.titleEn}
+                </Text>
               </View>
-              <Text style={styles.rowAction}>View</Text>
+              <Text style={styles.rowAction}>{rowAction}</Text>
             </Pressable>
           ))}
         </View>

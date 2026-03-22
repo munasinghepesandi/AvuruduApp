@@ -1,3 +1,4 @@
+import { useLanguage } from "@/src/context/language-context";
 import { Ionicons } from "@expo/vector-icons";
 import { SplashScreen, Tabs } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -8,6 +9,15 @@ SplashScreen.preventAutoHideAsync();
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
   const [isAppLoaded, setIsAppLoaded] = useState(false);
+  const { language } = useLanguage();
+
+  const tabLabels = {
+    index: language === "si" ? "නැකත්" : "Nakath",
+    explore: language === "si" ? "ක්‍රීඩා" : "Games",
+    food: language === "si" ? "කෑම බීම" : "Food",
+    songs: language === "si" ? "ජන ගී" : "Songs",
+    greetings: language === "si" ? "සුබපැතුම්" : "Greetings",
+  };
 
   useEffect(() => {
     const prepareApp = async () => {
@@ -53,7 +63,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "නැකත්",
+          title: tabLabels.index,
           tabBarIcon: ({ color }) => (
             <Ionicons name="time" size={24} color={color} />
           ),
@@ -62,7 +72,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="explore"
         options={{
-          title: "ක්‍රීඩා",
+          title: tabLabels.explore,
           tabBarIcon: ({ color }) => (
             <Ionicons name="trophy" size={24} color={color} />
           ),
@@ -71,7 +81,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="food"
         options={{
-          title: "කෑම බීම",
+          title: tabLabels.food,
           tabBarIcon: ({ color }) => (
             <Ionicons name="fast-food" size={24} color={color} />
           ),
@@ -80,7 +90,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="songs"
         options={{
-          title: "ජන ගී",
+          title: tabLabels.songs,
           tabBarIcon: ({ color }) => (
             <Ionicons name="musical-notes" size={24} color={color} />
           ),
@@ -89,7 +99,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="greetings"
         options={{
-          title: "සුබපැතුම්",
+          title: tabLabels.greetings,
           tabBarIcon: ({ color }) => (
             <Ionicons name="card" size={24} color={color} />
           ),

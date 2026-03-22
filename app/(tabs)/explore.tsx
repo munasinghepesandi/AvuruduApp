@@ -1,13 +1,15 @@
 import React from "react";
 import {
-  ImageBackground,
-  ScrollView,
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
+    ImageBackground,
+    ScrollView,
+    StyleSheet,
+    Text,
+    useWindowDimensions,
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import LanguageToggle from "../../src/components/language-toggle";
+import { useLanguage } from "../../src/context/language-context";
 import { GAMES_DATA } from "../../src/data/games";
 import { responsive } from "../../src/utils/responsive";
 
@@ -15,6 +17,14 @@ export default function ExploreScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const isSmallScreen = width < 380;
+  const { language } = useLanguage();
+
+  const title = language === "si" ? "අවුරුදු ක්‍රීඩා" : "Avurudu Games";
+  const games = GAMES_DATA.map((game) => ({
+    ...game,
+    name: language === "si" ? game.name : game.nameEn,
+    description: language === "si" ? game.description : game.descriptionEn,
+  }));
 
   return (
     <ImageBackground
@@ -24,6 +34,7 @@ export default function ExploreScreen() {
       style={styles.container}
     >
       <View style={styles.overlay} />
+      <LanguageToggle />
       <ScrollView
         contentContainerStyle={[
           styles.content,
@@ -36,10 +47,10 @@ export default function ExploreScreen() {
         ]}
       >
         <Text style={[styles.title, { fontSize: isSmallScreen ? 25 : 30 }]}>
-          අවුරුදු ක්‍රීඩා
+          {title}
         </Text>
 
-        {GAMES_DATA.map((game) => (
+        {games.map((game) => (
           <View
             key={game.id}
             style={[styles.gameCard, { padding: isSmallScreen ? 14 : 16 }]}

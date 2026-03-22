@@ -2,55 +2,81 @@ export interface Game {
   id: string;
   name: string;
   description: string;
+  nameEn: string;
+  descriptionEn: string;
 }
 
 export const GAMES_DATA: Game[] = [
   {
     id: "1",
     name: "ඔළිඳ කෙළිය",
+    nameEn: "Olinda Game",
     description:
       "ගණිත ක්‍රමයකට අනුව සිදුවෙන මෙම ගෘහස්‌ථ ක්‍රීඩාවට කාන්තාවන් දෙදෙනෙක්‌ සහභාගි වන අතර ක්‍රීඩාව ආරම්භයේ සිට අවසානය දක්‌වාම අත්වැල් ගායනය සිදු වේ. ඔළිඳ තිබෙන්නේ කොයි කොයි දේසේ ඔළිඳ තිබෙන්නේ බංගලි දේසේ...",
+    descriptionEn:
+      "A traditional indoor counting game usually played by two women. Rhythmic singing continues from start to finish while moving the seeds across the board.",
   },
   {
     id: "2",
     name: "චක්‌ගුඩු පැනීම",
+    nameEn: "Chakgudu Jumping",
     description:
       "අස්‌වැන්න නෙළා ගත් වෙල් යායක්‌ හෝ වැව් තාවුල්ලක්‌ වැනි හිස්‌ ඉඩකඩක චක්‌ගුඩු පැනීම සිදු වේ. ක්‍රීඩා භූමියේ සීමා දෙකක්‌ ලකුණු කරගනු ලැබේ. මෙම භූමිය හරි මැදින් කොටස්‌ දෙකකට බෙදා නායකයන් දෙදෙනෙක්‌ තෝරා ගනී.",
+    descriptionEn:
+      "A field game played in an open area after harvest. The ground is divided into two zones and led by two team leaders.",
   },
   {
     id: "3",
     name: "රබන් ගැසීම",
+    nameEn: "Rabana Drumming",
     description:
       "සිංහල ජන සමාජයේ උත්සව අවස්‌ථාවන් සමග සම්බන්ධ වූ රබන් ගැසීම කාන්තා පාර්ශ්වය සමග බැඳී පවතින ජන ක්‍රීඩාවකි. රබාන සමග බැඳී ඇති ජන විශ්වාසයන් කීපයක්‌ වේ. රබාන වටා නටමින් මෙන්ම දෑතින් මෙන්ම වැලමිටෙන්ද රබානට පහර දෙමින් අති දක්‌ෂ ලෙසින් ක්‍රීඩා කරන පිරිස්‌ අප අතර වේ.",
+    descriptionEn:
+      "A festive folk performance linked with Avurudu traditions, often led by women. Players drum and dance around the rabana with lively rhythm.",
   },
   {
     id: "4",
     name: "ඔන්චිල්ලා පැදීම",
+    nameEn: "Swing Riding",
     description:
       "ඔන්චිල්ලා පැදීම යනු කුඩා ළමුන් අතර ඉතා ජනප්‍රිය සම්ප්‍රදායක ක්‍රීඩාවකි. පත්තිනි දෙවියන් වෙනුවෙන් බාර වී ඔන්චිල්ලා ඉදි කරන බව කියන අතර කූඩු ඔන්චිල්ලා , බඹර ඔන්චිල්ලා, දෙපට ඔන්චිල්ලා, වැල් ඔන්චිල්ලා, යතුරු ඔන්චිල්ලා , සහ මල් ඔන්චිල්ලා ලෙස ප්‍රභේද ගණනාවකි. සිංහල අවුරුදු කාලයේදී පදිනු ලබන්නේ ලණු ඔන්චිල්ලාවයි. මෙහිදී දෙදෙනෙකුට වාඩි වී සිටිය හැකි අතර දෙන්නෙක්‌ දෙපැත්තේ සිට ඔන්චිල්ලාව පදවනු ලැබේ. සිංහල අවුරුදු කාලයේදී කලඑළි බසින ඔන්චිල්ලා පැදීමේදී ගායනා කරන කවි වාරම් ලෙස හැඳින්වේ.",
+    descriptionEn:
+      "A popular seasonal swing tradition enjoyed especially during Avurudu. Rope swings are decorated and used while singing traditional verses.",
   },
   {
     id: "5",
     name: "පංච කෙළිය",
+    nameEn: "Pancha Game",
     description:
       "දෙදෙනෙකු හෝ කණ්‌ඩායම් දෙකකට ක්‍රීඩා කළ හැක. ක්‍රීඩකයන් ගණන ඉරට්‌ටේ සංඛ්‍යාවක්‌ වීම අනිවාර්ය වේ. ඔත්තේ ගණනක්‌ සිටින විට හුංගෙක්‌ පත්කර ගනු ලබයි. කණ්‌ඩායම් දෙකක්‌ ක්‍රීඩා කරන විට දෙපිලට නායකයන් දෙදෙනෙක්‌ පත් කර ගනු ලබයි.",
+    descriptionEn:
+      "A strategy game played by two players or two teams. Team sizes are usually even, and each side chooses a leader.",
   },
   {
     id: "6",
     name: "එළුවන් කෑම",
+    nameEn: "Eluwan Kaema",
     description:
       "පිරිසක්‌ විසින් සිදු කරන මෙම ක්‍රීඩාව ගායනය සහ රංගනයේ එකතුවක්‌ ලෙස සදු වේ. එළුවෙකු සහ කොටියකු අතර සිදු වන කතා බහ දෙබසක අන්දමට සිදු වේ. තරගයේ ස්‌වභාවය අනුව වචන උස්‌ පහත් විමද සිදු වේ.",
+    descriptionEn:
+      "A group game blending acting and singing, often performed as a playful dialogue between a goat and a tiger.",
   },
   {
     id: "7",
     name: "මේවර කෙළිය",
+    nameEn: "Mewara Game",
     description:
       "සිංහල අවුරුදු කාලයේදී බෙහෙවින් ජනප්‍රිය මේවර කෙළිය කාන්තාවන්ගේ සහභාගිත්වයෙන් සිදු වෙයි. මෙම ක්‍රීඩාව පිළිබඳව විවිධ අදහස්‌ ඇති අතර එයින් එකක්‌ වන්නේ, මේවර යනු වළල්ලකි. එක්‌ ස්‌ත්‍රියක්‌ තමන්ට අයිති වළල්ලක්‌ සෙවීම මෙහි කතා පුවතයි. තමන්ගේ වළල්ල දුටුවාදැයි ඇය සිය මිතුරියන්ගෙන් ප්‍රශ්න කරයි. තමන් එය නුදුටු බව ඔවුන් දිවුරමින් කියයි. නමුත් එම වළල්ල සඟවා ගෙන සිටින්නේ ඇයගේම මිතුරියන්ය.",
+    descriptionEn:
+      "A women-centered folk game popular during Avurudu. The play revolves around searching for a hidden ring through humorous dialogue.",
   },
   {
     id: "8",
     name: "කඹ ඇදීම",
+    nameEn: "Tug of War",
     description:
       "සිංහල අලුත් අවුරුදු කාලයේදී දක්‌නට ලැබෙන කඹ ඇදීම සිංහල ජන ක්‍රීඩාවන් අතරට ගැනෙන විශේෂිත ක්‍රීඩාවකි. මෙම ක්‍රිඩාව නාවිකයන්ගෙන් ආරම්භ වන්නට ඇතැයි සලකනු ලැබේ. මාස ගණනක්‌ මුළුල්ලේ මුහුදු ගමනෙහි යෙදුණු නාවිකයන් ඔවුන්ගේ විනෝදය සහ ව්‍යායාමය උදෙසා කඹ ඇදීම සිදු කළ බැව් විශ්වාස කෙරේ.",
+    descriptionEn:
+      "A classic Avurudu strength contest between two teams pulling opposite ends of a rope. It is one of the best-known traditional games.",
   },
 ];

@@ -2,30 +2,74 @@ import * as ImagePicker from "expo-image-picker";
 import * as Sharing from "expo-sharing";
 import React, { useRef, useState } from "react";
 import {
-  Alert,
-  ImageBackground,
-  Modal,
-  Platform,
-  ScrollView,
-  Share,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    ImageBackground,
+    Modal,
+    Platform,
+    ScrollView,
+    Share,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ViewShot from "react-native-view-shot";
 import ColorPicker from "react-native-wheel-color-picker";
+import LanguageToggle from "../../src/components/language-toggle";
+import { useLanguage } from "../../src/context/language-context";
 import { responsive, responsiveFontSize } from "../../src/utils/responsive";
 
 export default function GreetingsScreen() {
   const insets = useSafeAreaInsets();
+  const { language } = useLanguage();
   const [name, setName] = useState<string>("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [wishColor, setWishColor] = useState<string>("#FFD700");
   const [showColorPicker, setShowColorPicker] = useState<boolean>(false);
   const viewShotRef = useRef<any>(null);
+
+  const text = {
+    title:
+      language === "si"
+        ? "ඩිජිටල් සුබපැතුම් පතක් හදමු"
+        : "Create a Digital Greeting Card",
+    namePlaceholder:
+      language === "si" ? "ඔබේ නම මෙතන ලියන්න..." : "Type your name here...",
+    photo: language === "si" ? "ඡායාරූපය" : "Photo",
+    color: language === "si" ? "වර්ණය" : "Color",
+    wishLine1:
+      language === "si"
+        ? "ඔබටත් ඔබ පවුලේ සැමටත් සාමය සතුට පිරි"
+        : "Wishing you and your family peace and happiness",
+    wishLine2:
+      language === "si"
+        ? "සුබ අලුත් අවුරුද්දක් වේවා!"
+        : "Happy Sinhala & Tamil New Year!",
+    senderPrefix: language === "si" ? "මීට -" : "From -",
+    shareButton: language === "si" ? "මිතුරන්ට යවන්න" : "Share with Friends",
+    applyColor: language === "si" ? "වර්ණය යොදන්න" : "Apply Color",
+    browserNotSupportedTitle: "Browser Not Supported",
+    browserNotSupportedBody:
+      language === "si"
+        ? "ඔයාගේ browser එක මේ feature එකට support කරන්නේ නැහැ."
+        : "Your browser does not support this feature.",
+    downloadReadyTitle: language === "si" ? "Download Ready" : "Download Ready",
+    downloadReadyBody:
+      language === "si"
+        ? "පිංතූරය download වුණා."
+        : "Image downloaded successfully.",
+    shareDialogTitle:
+      language === "si" ? "මිතුරන්ට යවන්න" : "Share with Friends",
+    shareMessage:
+      language === "si" ? "මගේ අවුරුදු සුබපැතුම" : "My New Year greeting",
+    shareErrorTitle: "Share Error",
+    shareErrorBody:
+      language === "si"
+        ? "Share options open කරන්න බැරි වුණා."
+        : "Could not open share options.",
+  };
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -44,8 +88,8 @@ export default function GreetingsScreen() {
       if (Platform.OS === "web") {
         if (typeof document === "undefined") {
           Alert.alert(
-            "Browser Not Supported",
-            "ඔයාගේ browser එක මේ feature එකට support කරන්නේ නැහැ.",
+            text.browserNotSupportedTitle,
+            text.browserNotSupportedBody,
           );
           return;
         }
@@ -64,14 +108,14 @@ export default function GreetingsScreen() {
 
             if (nav.canShare?.({ files: [file] })) {
               await nav.share({
-                title: "සුබ අලුත් අවුරුද්දක් වේවා!",
-                text: "මගේ අවුරුදු සුබපැතුම",
+                title: text.wishLine2,
+                text: text.shareMessage,
                 files: [file],
               });
             } else {
               await nav.share({
-                title: "සුබ අලුත් අවුරුද්දක් වේවා!",
-                text: "මගේ අවුරුදු සුබපැතුම",
+                title: text.wishLine2,
+                text: text.shareMessage,
               });
             }
 
@@ -87,7 +131,7 @@ export default function GreetingsScreen() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        Alert.alert("Download Ready", "පිංතූරය download වුණා.");
+        Alert.alert(text.downloadReadyTitle, text.downloadReadyBody);
         return;
       }
 
@@ -96,26 +140,26 @@ export default function GreetingsScreen() {
         await Sharing.shareAsync(uri, {
           mimeType: "image/jpeg",
           UTI: "public.jpeg",
-          dialogTitle: "මිතුරන්ට යවන්න",
+          dialogTitle: text.shareDialogTitle,
         });
         return;
       }
 
       await Share.share({
-        message: "සුබ අලුත් අවුරුද්දක් වේවා!",
+        message: text.wishLine2,
         url: uri,
-        title: "මිතුරන්ට යවන්න",
+        title: text.shareDialogTitle,
       });
     } catch {
       if (Platform.OS === "web") {
         Alert.alert(
-          "Browser Not Supported",
-          "ඔයාගේ browser එක මේ feature එකට support කරන්නේ නැහැ.",
+          text.browserNotSupportedTitle,
+          text.browserNotSupportedBody,
         );
         return;
       }
 
-      Alert.alert("Share Error", "Share options open කරන්න බැරි වුණා.");
+      Alert.alert(text.shareErrorTitle, text.shareErrorBody);
     }
   };
 
@@ -127,6 +171,7 @@ export default function GreetingsScreen() {
       style={styles.screen}
     >
       <View style={styles.overlay} />
+      <LanguageToggle />
       <ScrollView
         style={styles.container}
         contentContainerStyle={{
@@ -135,24 +180,24 @@ export default function GreetingsScreen() {
           paddingBottom: 50,
         }}
       >
-        <Text style={styles.title}>ඩිජිටල් සුබපැතුම් පතක් හදමු</Text>
+        <Text style={styles.title}>{text.title}</Text>
 
         <TextInput
           style={styles.input}
-          placeholder="ඔබේ නම මෙතන ලියන්න..."
+          placeholder={text.namePlaceholder}
           onChangeText={setName}
           placeholderTextColor="#999"
         />
 
         <View style={styles.buttonRow}>
           <TouchableOpacity style={styles.actionBtn} onPress={pickImage}>
-            <Text style={styles.btnText}>Photo </Text>
+            <Text style={styles.btnText}>{text.photo}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.actionBtn, { backgroundColor: "#ad3e07" }]}
             onPress={() => setShowColorPicker(true)}
           >
-            <Text style={styles.btnText}>Color </Text>
+            <Text style={styles.btnText}>{text.color}</Text>
           </TouchableOpacity>
         </View>
 
@@ -167,14 +212,16 @@ export default function GreetingsScreen() {
           >
             <View style={styles.cardOverlay}>
               <Text style={[styles.wishText1, { color: wishColor }]}>
-                ඔබටත් ඔබ පවුලේ සැමටත් සාමය සතුට පිරි
+                {text.wishLine1}
               </Text>
               <Text style={[styles.wishText2, { color: wishColor }]}>
-                සුබ අලුත් අවුරුද්දක් වේවා!
+                {text.wishLine2}
               </Text>
               <View style={{ height: 20 }} />
               {name ? (
-                <Text style={styles.senderText}>මීට - {name}</Text>
+                <Text style={styles.senderText}>
+                  {text.senderPrefix} {name}
+                </Text>
               ) : null}
             </View>
           </ImageBackground>
@@ -182,7 +229,7 @@ export default function GreetingsScreen() {
 
         <TouchableOpacity style={styles.shareBtn} onPress={handleShare}>
           <Text style={[styles.btnText, { fontSize: responsiveFontSize(18) }]}>
-            මිතුරන්ට යවන්න
+            {text.shareButton}
           </Text>
         </TouchableOpacity>
 
@@ -200,7 +247,7 @@ export default function GreetingsScreen() {
               style={styles.closeBtn}
               onPress={() => setShowColorPicker(false)}
             >
-              <Text style={styles.btnText}>Apply Color</Text>
+              <Text style={styles.btnText}>{text.applyColor}</Text>
             </TouchableOpacity>
           </View>
         </Modal>

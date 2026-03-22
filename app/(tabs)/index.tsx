@@ -1,23 +1,24 @@
+import { AbhayaLibre_700Bold, useFonts } from "@expo-google-fonts/abhaya-libre";
 import * as Notifications from "expo-notifications";
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
-  Animated,
-  ImageBackground,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    Animated,
+    ImageBackground,
+    Modal,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
+import LanguageToggle from "../../src/components/language-toggle";
 import NakathItem from "../../src/components/nakathItems";
+import { useLanguage } from "../../src/context/language-context";
 import { Nakath, NAKATH_DATA } from "../../src/data/nakath";
 import { responsive } from "../../src/utils/responsive";
-// අප පෙර install කළ Font එක භාවිතා කරමු
-import { AbhayaLibre_700Bold, useFonts } from "@expo-google-fonts/abhaya-libre";
 
 const IS_WEB = Platform.OS === "web";
 
@@ -25,14 +26,23 @@ type NakathStatus = "completed" | "upcoming";
 type NakathWithStatus = Nakath & { status: NakathStatus };
 
 const resolveMonthIndex = (monthLabel: string) => {
-  if (monthLabel.includes("මාර්තු")) return 2;
-  if (monthLabel.includes("අප්")) return 3;
+  const normalized = monthLabel.toLowerCase();
+  if (normalized.includes("මාර්තු") || normalized.includes("march")) return 2;
+  if (normalized.includes("අප්") || normalized.includes("april")) return 3;
   return null;
 };
 
 const to24Hour = (period: string, hour: number) => {
-  if (period === "ප.ව." && hour < 12) return hour + 12;
-  if (period === "පෙ.ව." && hour === 12) return 0;
+  const normalized = period.toUpperCase();
+
+  if ((period === "ප.ව." || normalized === "PM") && hour < 12) {
+    return hour + 12;
+  }
+
+  if ((period === "පෙ.ව." || normalized === "AM") && hour === 12) {
+    return 0;
+  }
+
   return hour;
 };
 
@@ -40,7 +50,7 @@ const getNakathRange = (timeLabel: string, year: number) => {
   const clean = timeLabel.trim();
 
   const dayRangeMatch = clean.match(
-    /^(මාර්තු|අප්‍රේල්)\s*(\d{1,2})-(\d{1,2})$/,
+    /^(මාර්තු|අප්‍රේල්|March|April)\s*(\d{1,2})-(\d{1,2})$/i,
   );
   if (dayRangeMatch) {
     const monthIndex = resolveMonthIndex(dayRangeMatch[1]);
@@ -55,7 +65,7 @@ const getNakathRange = (timeLabel: string, year: number) => {
   }
 
   const exactTimeMatch = clean.match(
-    /^(මාර්තු|අප්‍රේල්)\s*(\d{1,2})\s*-\s*(පෙ\.ව\.|ප\.ව\.)\s*(\d{1,2}):(\d{2})$/,
+    /^(මාර්තු|අප්‍රේල්|March|April)\s*(\d{1,2})\s*-\s*(පෙ\.ව\.|ප\.ව\.|AM|PM)\s*(\d{1,2}):(\d{2})$/i,
   );
   if (exactTimeMatch) {
     const monthIndex = resolveMonthIndex(exactTimeMatch[1]);
@@ -70,7 +80,9 @@ const getNakathRange = (timeLabel: string, year: number) => {
     return { start: exact, end: exact };
   }
 
-  const dayOnlyMatch = clean.match(/^(මාර්තු|අප්‍රේල්)\s*(\d{1,2})$/);
+  const dayOnlyMatch = clean.match(
+    /^(මාර්තු|අප්‍රේල්|March|April)\s*(\d{1,2})$/i,
+  );
   if (dayOnlyMatch) {
     const monthIndex = resolveMonthIndex(dayOnlyMatch[1]);
     if (monthIndex === null) return null;
@@ -85,19 +97,72 @@ const getNakathRange = (timeLabel: string, year: number) => {
   return null;
 };
 
-const getNakathStatus = (item: Nakath, now: Date): NakathStatus => {
-  const range = getNakathRange(item.time, now.getFullYear());
+const getNakathStatus = (
+  item: Nakath,
+  now: Date,
+  language: "si" | "en",
+): NakathStatus => {
+  const timeLabel = language === "si" ? item.time : item.timeEn;
+  const range = getNakathRange(timeLabel, now.getFullYear());
   if (!range) return "upcoming";
   return now.getTime() > range.end.getTime() ? "completed" : "upcoming";
 };
 
 export default function NakathScreen() {
+  const { language } = useLanguage();
+  const isSinhala = language === "si";
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [selectedNakath, setSelectedNakath] = useState<Nakath | null>(null); // තෝරාගත් නැකත තබා ගැනීමට
+  const [selectedNakath, setSelectedNakath] = useState<Nakath | null>(null);
   const [nakathModalVisible, setNakathModalVisible] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const splashOpacity = useState(new Animated.Value(1))[0];
-  let [fontsLoaded] = useFonts({ AbhayaLibre_700Bold });
+  const [fontsLoaded] = useFonts({ AbhayaLibre_700Bold });
+
+  const ui = {
+    splashTitle: isSinhala ? "ආයුබෝවන්" : "Welcome",
+    splashSubtitle: isSinhala
+      ? "සුබ අලුත් අවුරුද්දක් වේවා!"
+      : "Happy Sinhala & Tamil New Year!",
+    heroTitle: isSinhala
+      ? "සුබ අලුත් අවුරුද්දක් වේවා!"
+      : "Happy Sinhala & Tamil New Year!",
+    clockCaption: isSinhala ? "සජීවී අවුරුදු වේලාව" : "Live Avurudu Time",
+    sectionTitle: isSinhala
+      ? "සිංහල අලුත් අවුරුදු නැකත්"
+      : "Sinhala New Year Nakath",
+    completedTitle: isSinhala ? "අවසන් චාරිත්‍ර" : "Completed Rituals",
+    upcomingTitle: isSinhala ? "ඉදිරියට ඇති චාරිත්‍ර" : "Upcoming Rituals",
+    noCompleted: isSinhala
+      ? "තවම අවසන් වූ චාරිත්‍ර නොමැත."
+      : "No completed rituals yet.",
+    eventCount: isSinhala ? "සිදුවීම්" : "Events",
+    timeLabel: isSinhala ? "🕒 වේලාව:" : "🕒 Time:",
+    statusCompleted: isSinhala ? "✅ තත්ත්වය: අවසන්" : "✅ Status: Completed",
+    statusUpcoming: isSinhala ? "⏳ තත්ත්වය: ඉදිරියට" : "⏳ Status: Upcoming",
+    colorLabel: isSinhala ? "🎨 වර්ණය:" : "🎨 Color:",
+    noColor: isSinhala ? "නැත" : "None",
+    reminderButton: isSinhala ? "මතක් කිරීම දාන්න" : "Set Reminder",
+    closeButton: isSinhala ? "වසන්න" : "Close",
+    reminderTitle: isSinhala ? "මතක් කිරීමක් සැකසුවා" : "Reminder Set",
+    reminderBody: isSinhala
+      ? "සඳහා විනාඩි 5කට පෙර දැනුම් දෙනු ඇත."
+      : "will be notified 5 minutes earlier.",
+    reminderNotificationTitle: isSinhala
+      ? "අවුරුදු නැකත් මතක් කිරීම"
+      : "Avurudu Nakath Reminder",
+    reminderNotificationBody: isSinhala
+      ? "සඳහා වේලාව පැමිණ ඇත!"
+      : "time has arrived!",
+    upcomingBadge: isSinhala ? "ඉදිරියේදී" : "Upcoming",
+    completedBadge: isSinhala ? "පසුගිය" : "Completed",
+  };
+
+  const getLocalizedEvent = (item: Nakath) =>
+    isSinhala ? item.event : item.eventEn;
+  const getLocalizedTime = (item: Nakath) =>
+    isSinhala ? item.time : item.timeEn;
+  const getLocalizedDescription = (item: Nakath) =>
+    isSinhala ? item.description : item.descriptionEn;
 
   // On web, always show the app even if fonts are loading
   const shouldRender = IS_WEB || fontsLoaded;
@@ -130,16 +195,19 @@ export default function NakathScreen() {
     setNakathModalVisible(true);
   };
 
-  const formattedTime = currentTime.toLocaleTimeString("si-LK", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  });
+  const formattedTime = currentTime.toLocaleTimeString(
+    isSinhala ? "si-LK" : "en-US",
+    {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    },
+  );
 
   const nakathWithStatus: NakathWithStatus[] = NAKATH_DATA.map((item) => ({
     ...item,
-    status: getNakathStatus(item, currentTime),
+    status: getNakathStatus(item, currentTime, language),
   }));
   const completedNakath = nakathWithStatus.filter(
     (item) => item.status === "completed",
@@ -148,15 +216,15 @@ export default function NakathScreen() {
     (item) => item.status === "upcoming",
   );
   const selectedNakathStatus = selectedNakath
-    ? getNakathStatus(selectedNakath, currentTime)
+    ? getNakathStatus(selectedNakath, currentTime, language)
     : null;
 
   const setReminder = async (event: string) => {
     if (Platform.OS !== "web") {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: "අවුරුදු නැකත් මතක් කිරීම",
-          body: `${event} සඳහා වේලාව පැමිණ ඇත!`,
+          title: ui.reminderNotificationTitle,
+          body: `${event} ${ui.reminderNotificationBody}`,
         },
         trigger: {
           type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
@@ -164,10 +232,7 @@ export default function NakathScreen() {
         },
       });
     }
-    Alert.alert(
-      "මතක් කිරීමක් සැකසුවා",
-      `${event} සඳහා විනාඩි 5කට පෙර දැනුම් දෙනු ඇත.`,
-    );
+    Alert.alert(ui.reminderTitle, `${event} ${ui.reminderBody}`);
   };
 
   if (!shouldRender) {
@@ -175,7 +240,7 @@ export default function NakathScreen() {
       <View>
         <Text>Loading...</Text>
       </View>
-    ); // මෙහෙම දෙයක් දාන්න
+    );
   }
 
   return (
@@ -192,9 +257,11 @@ export default function NakathScreen() {
           >
             <View style={styles.splashOverlay} />
             <View style={styles.splashContent}>
-              <Text style={[styles.splashTitle, styles.font]}>ආයුබෝවන්</Text>
+              <Text style={[styles.splashTitle, styles.font]}>
+                {ui.splashTitle}
+              </Text>
               <Text style={[styles.splashSubtitle, styles.font]}>
-                සුබ අලුත් අවුරුද්දක් වේවා!
+                {ui.splashSubtitle}
               </Text>
               <View style={styles.splashLoader}>
                 <View style={styles.loaderDot} />
@@ -212,6 +279,7 @@ export default function NakathScreen() {
         style={styles.container}
       >
         <View style={styles.overlay} />
+        <LanguageToggle />
         <ScrollView
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
@@ -220,16 +288,14 @@ export default function NakathScreen() {
             <Text style={[styles.heroBadge, styles.font]}>
               Pesandi Munasinghe | v1.0.0 Avurudu 2026
             </Text>
-            <Text style={[styles.heroTitle, styles.font]}>
-              සුබ අලුත් අවුරුද්දක් වේවා!
-            </Text>
+            <Text style={[styles.heroTitle, styles.font]}>{ui.heroTitle}</Text>
 
             <View style={styles.clockCard}>
               <Text style={[styles.dateText, styles.font]}>
-                {currentTime.toLocaleDateString("si-LK")}
+                {currentTime.toLocaleDateString(isSinhala ? "si-LK" : "en-US")}
               </Text>
               <Text style={styles.liveTime}>{formattedTime}</Text>
-              <Text style={styles.clockCaption}>Live Avurudu Time</Text>
+              <Text style={styles.clockCaption}>{ui.clockCaption}</Text>
             </View>
 
             {/* <Image
@@ -243,21 +309,23 @@ export default function NakathScreen() {
 
           <View style={styles.sectionHeaderRow}>
             <Text style={[styles.sectionTitle, styles.font]}>
-              සිංහල අලුත් අවුරුදු නැකත්
+              {ui.sectionTitle}
             </Text>
-            <Text style={styles.sectionMeta}>{NAKATH_DATA.length} Events</Text>
+            <Text style={styles.sectionMeta}>
+              {NAKATH_DATA.length} {ui.eventCount}
+            </Text>
           </View>
 
           <View style={styles.statusSectionHeader}>
             <Text style={[styles.statusSectionTitle, styles.font]}>
-              අවසන් චාරිත්‍ර
+              {ui.completedTitle}
             </Text>
             <Text style={styles.statusSectionCount}>
               {completedNakath.length}
             </Text>
           </View>
           {completedNakath.length === 0 ? (
-            <Text style={styles.emptyState}>තවම අවසන් වූ චාරිත්‍ර නොමැත.</Text>
+            <Text style={styles.emptyState}>{ui.noCompleted}</Text>
           ) : (
             completedNakath.map((item) => (
               <Pressable
@@ -269,9 +337,11 @@ export default function NakathScreen() {
                 ]}
               >
                 <NakathItem
-                  event={item.event}
-                  time={item.time}
+                  event={getLocalizedEvent(item)}
+                  time={getLocalizedTime(item)}
                   isUpcoming={item.status === "upcoming"}
+                  upcomingLabel={ui.upcomingBadge}
+                  completedLabel={ui.completedBadge}
                 />
               </Pressable>
             ))
@@ -279,7 +349,7 @@ export default function NakathScreen() {
 
           <View style={styles.statusSectionHeader}>
             <Text style={[styles.statusSectionTitle, styles.font]}>
-              ඉදිරියට ඇති චාරිත්‍ර
+              {ui.upcomingTitle}
             </Text>
             <Text style={styles.statusSectionCount}>
               {upcomingNakath.length}
@@ -295,9 +365,11 @@ export default function NakathScreen() {
               ]}
             >
               <NakathItem
-                event={item.event}
-                time={item.time}
+                event={getLocalizedEvent(item)}
+                time={getLocalizedTime(item)}
                 isUpcoming={item.status === "upcoming"}
+                upcomingLabel={ui.upcomingBadge}
+                completedLabel={ui.completedBadge}
               />
             </Pressable>
           ))}
@@ -312,11 +384,12 @@ export default function NakathScreen() {
           <View style={styles.modalBackdrop}>
             <View style={styles.modalCard}>
               <Text style={[styles.modalTitle, styles.font]}>
-                {selectedNakath?.event}
+                {selectedNakath ? getLocalizedEvent(selectedNakath) : ""}
               </Text>
 
               <Text style={styles.modalMeta}>
-                🕒 වේලාව: {selectedNakath?.time}
+                {ui.timeLabel}{" "}
+                {selectedNakath ? getLocalizedTime(selectedNakath) : ""}
               </Text>
               <Text
                 style={[
@@ -327,15 +400,15 @@ export default function NakathScreen() {
                 ]}
               >
                 {selectedNakathStatus === "completed"
-                  ? "✅ තත්ත්වය: අවසන්"
-                  : "⏳ තත්ත්වය: ඉදිරියට"}
+                  ? ui.statusCompleted
+                  : ui.statusUpcoming}
               </Text>
               <Text style={styles.modalMeta}>
-                🎨 වර්ණය: {selectedNakath?.color?.trim() || "නැත"}
+                {ui.colorLabel} {selectedNakath?.color?.trim() || ui.noColor}
               </Text>
 
               <Text style={styles.modalDescription}>
-                {selectedNakath?.description}
+                {selectedNakath ? getLocalizedDescription(selectedNakath) : ""}
               </Text>
 
               <View style={styles.modalButtonsRow}>
@@ -343,18 +416,20 @@ export default function NakathScreen() {
                   style={[styles.modalButton, styles.reminderButton]}
                   onPress={() => {
                     if (selectedNakath) {
-                      setReminder(selectedNakath.event);
+                      setReminder(getLocalizedEvent(selectedNakath));
                     }
                   }}
                 >
-                  <Text style={styles.modalButtonText}>මතක් කිරීම දාන්න</Text>
+                  <Text style={styles.modalButtonText}>
+                    {ui.reminderButton}
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={[styles.modalButton, styles.closeButton]}
                   onPress={() => setNakathModalVisible(false)}
                 >
-                  <Text style={styles.modalButtonText}>වසන්න</Text>
+                  <Text style={styles.modalButtonText}>{ui.closeButton}</Text>
                 </TouchableOpacity>
               </View>
             </View>
