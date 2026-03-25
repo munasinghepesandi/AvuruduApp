@@ -15,7 +15,7 @@ Navigation: Expo Router
 Deployment: Netlify (Web) | EAS (Android APK)
 Features: Multi-language Localization (i18n), Custom Image Generation.</p>
 
-<p><b>Project Output</b></p>
+<h2><b>Project Output</b></h2>
 
 <h3>Sinhala Translation</h3>
 <table>
