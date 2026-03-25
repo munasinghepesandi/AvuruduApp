@@ -1,50 +1,22 @@
-# Welcome to your Expo app 👋
+<h1>Introducing "Avurudu 2026" – My Complete Sinhala & Tamil New Year Companion! ✨</h1>
+<p>I am excited to share my latest personal project: "Avurudu 2026" a cross-platform mobile application I developed from scratch using React Native and Expo.
+As a SE Intern I took this as a challenge to build a fully functional application to help everyone celebrate the Sinhal and Tamil new year with ease.</p>
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+<p><b>✨ Key Features:</b>
+Real-time Auspicious Times (Nakath): Stay updated with live countdowns for all traditional rituals.
+Traditional Recipes: Step-by-step guides to making your favorite New Year treats.
+Traditional Games: Detailed descriptions of classic New Year games.
+Custom Greeting Card Generator: Create and share personalized New Year wishes with your name and photo!
+Multi-language Support: Seamlessly switch between Sinhala and English for a better user experience.</p>
 
-## Get started
+<p>🛠️ Tech Stack:
+Frontend: React Native | Expo | TypeScript
+Navigation: Expo Router
+Deployment: Netlify (Web) | EAS (Android APK)
+Features: Multi-language Localization (i18n), Custom Image Generation.</p>
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+<p>🔗 Try it out now:<br/>
+🌐 Live Web Demo (Android, iOS & PC): [https://avurudu2026.netlify.app/]<br/>
+📥 Download Android App (APK): [https://expo.dev/.../bf9a433e-2671-49d2-b6ca-0343e328c842]</p>
+<p>I handled the entire development process, including UI/UX design core logic, and multi language implementation.</p> <br/>
+#ReactNative #Expo #MobileAppDevelopment #SinhalaNewYear #SriLankaTech #SoftwareEngineering #PortfolioProject #WebDevelopment #AppDesign #InternshipProject
