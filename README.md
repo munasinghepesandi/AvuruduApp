@@ -15,6 +15,40 @@ Navigation: Expo Router
 Deployment: Netlify (Web) | EAS (Android APK)
 Features: Multi-language Localization (i18n), Custom Image Generation.</p>
 
+<p><b>Project Output</b></p>
+
+<h3>Sinhala Translation</h3>
+<table>
+  <tr>
+    <td><img src="./outputImg/im1.jpeg" width="150"/></td>
+    <td><img src="./outputImg/im2.jpeg" width="150"/></td>
+    <td><img src="./outputImg/im3.jpeg" width="150"/></td>
+    <td><img src="./outputImg/im5.jpeg" width="150"/></td>
+  </tr>
+  <tr>
+    <td><img src="./outputImg/im7.jpeg" width="150"/></td>
+    <td><img src="./outputImg/im9.jpeg" width="150"/></td>
+    <td><img src="./outputImg/im11.jpeg" width="150"/></td>
+    <td></td>
+  </tr>
+</table>
+
+<h3>English Translation</h3>
+<table>
+  <tr>
+    <td><img src="./outputImg/im1.jpeg" width="150"/></td>
+    <td><img src="./outputImg/im2.jpeg" width="150"/></td>
+    <td><img src="./outputImg/im4.jpeg" width="150"/></td>
+    <td><img src="./outputImg/im6.jpeg" width="150"/></td>
+  </tr>
+  <tr>
+    <td><img src="./outputImg/im8.jpeg" width="150"/></td>
+    <td><img src="./outputImg/im10.jpeg" width="150"/></td>
+    <td><img src="./outputImg/im12.jpeg" width="150"/></td>
+    <td></td>
+  </tr>
+</table>
+
 <p>🔗 Try it out now:<br/>
 🌐 Live Web Demo (Android, iOS & PC): [https://avurudu2026.netlify.app/]<br/>
 📥 Download Android App (APK): [https://expo.dev/.../bf9a433e-2671-49d2-b6ca-0343e328c842]</p>
